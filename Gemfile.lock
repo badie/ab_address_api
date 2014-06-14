@@ -54,5 +54,6 @@ PLATFORMS
 DEPENDENCIES
   capybara
   cucumber
+  rack-test
   rspec
   sinatra
