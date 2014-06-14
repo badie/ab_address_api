@@ -1,0 +1,22 @@
+development:
+  sessions:
+    default:
+      database: simple_address_api_development
+      hosts:
+      - localhost:27017
+
+test:
+  sessions:
+    default:
+      database: simple_address_api_test
+      hosts:
+      - localhost:27017
+
+production:
+  sessions:
+    default:
+      uri: <%= ENV['MONGOHQ_URL'] %>
+      options:
+        consistency: :strong
+        max_retries: 1
+        retry_interval: 0
