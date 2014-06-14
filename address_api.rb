@@ -4,8 +4,7 @@ require 'json'
 
 require 'mongoid'
 
-
-set :environment, :development
+set :environment, ENV['RACK_ENV'].to_s.to_sym
 
 Mongoid.load!('./mongoid.yml')
 enable :sessions
