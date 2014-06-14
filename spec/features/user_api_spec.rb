@@ -1,21 +1,32 @@
 require 'spec_helper'
 require 'json'
+require 'bson'
 
 feature "Users API", type: :feature do
   background do
     @user = User.create(name: 'Test User', email: 'test@user.com')
   end
 
+  def json_put path, hash
+    put path, hash.to_json, {"CONTENT_TYPE" => "application/json"}
+  end
+
+  def json_post path, hash
+    post path, hash.to_json, {"CONTENT_TYPE" => "application/json"}
+  end
+
   context 'Create User' do
     scenario 'valid user' do
-      post '/api/v1/users', user: {name: 'New User', email: 'new.user@email.com'}
+      json_post '/api/v1/users', user: {name: 'New User', email: 'new.user@email.com'}
+      body = JSON.parse(last_response.body)
 
       expect(last_response.status).to eq 201
-      expect(JSON.parse(last_response.body)).to include 'id' => an_instance_of(Fixnum), 'name' => 'New User', 'email' => 'new.user@email.com'
+      expect(body).to include 'name' => 'New User', 'email' => 'new.user@email.com'
+      expect(BSON::ObjectId.legal?(body['id'])).to eq true
     end
 
     scenario 'invalid user' do
-      post '/api/v1/users', user: {}
+      json_post '/api/v1/users', user: {}
 
       expect(last_response.status).to eq 422
       expect(JSON.parse(last_response.body)).to have_key 'errors'
@@ -27,7 +38,7 @@ feature "Users API", type: :feature do
       get "/api/v1/users/#{@user.id}"
 
       expect(last_response.status).to eq 200
-      expect(JSON.parse(last_response.body)).to include 'id' => an_instance_of(Fixnum), 'name' => @user.name, 'email' => @user.email
+      expect(JSON.parse(last_response.body)).to include 'name' => @user.name, 'email' => @user.email
     end
 
     scenario 'non existing user' do
@@ -38,24 +49,24 @@ feature "Users API", type: :feature do
 
   context 'Update User' do
     scenario 'valid user' do
-      put "/api/v1/users/#{@user_id}", user: {name: 'Updated Test User', email: 'updated@email.com'}
+      json_put "/api/v1/users/#{@user.id}", user: {name: 'Updated Test User', email: 'updated@email.com'}
 
       expect(last_response.status).to eq 200
-      expect(JSON.parse(last_response.body)).to include 'id' => an_instance_of(Fixnum), 'name' => 'Updated Test User', 'email' => 'updated@email.com'
+      expect(JSON.parse(last_response.body)).to include 'name' => 'Updated Test User', 'email' => 'updated@email.com'
     end
 
     scenario 'non existing user' do
-      put '/api/v1/users/99999', user: {name: 'Updated Test User', email: 'updated@email.com'}
+      json_put '/api/v1/users/99999', user: {name: 'Updated Test User', email: 'updated@email.com'}
       expect(last_response.status).to eq 404
     end
   end
 
   context 'Delete User' do
     scenario 'valid user' do
-      delete "/api/v1/users/#{@user_id}"
+      delete "/api/v1/users/#{@user.id}"
 
       expect(last_response.status).to eq 200
-      expect(last_response.body).to eq ""
+      expect(last_response.body).to eq "{}"
     end
 
     scenario 'non existing user' do

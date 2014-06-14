@@ -17,6 +17,10 @@ def app
   AddressApi
 end
 
+set :environment, :test
+Mongoid.load!('./mongoid.yml')
+enable :sessions
+
 RSpec.configure do |config| 
   config.include Mongoid::Matchers, type: :model
 

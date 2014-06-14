@@ -12,8 +12,8 @@ feature "Contacts API", type: :feature do
       json = JSON.parse(last_response.body)
 
       expect(last_response.status).to eq 200
-      expect(json).to have_key 'users'
-      expect(json['users']).to be_a Array
+      expect(json).to have_key 'contacts'
+      expect(json['contacts']).to be_a Array
     end
 
     scenario 'non existing user' do
